@@ -61,10 +61,22 @@ xfsquotactl(
 	uint		id,
 	void		*addr)
 {
-	int		qcommand, qtype;
+	int		qcommand, qtype, ret, fd;
 
 	qtype = xtype_to_qtype(type);
 	qcommand = xcommand_to_qcommand(command);
 
-	return quotactl(QCMD(qcommand, qtype), device, id, addr);
+	ret = quotactl(QCMD(qcommand, qtype), device, id, addr);
+
+	if (!ret && !fs_path)
+		return ret;
+
+	fd = open(fs_path->fs_dir, O_PATH);
+	if (fd < 0)
+		return ret;
+
+	ret = syscall(__NR_quotactl_fd, fd, QCMD(qcommand, qtype), id, addr);
+	close(fd);
+
+	return ret;
 }

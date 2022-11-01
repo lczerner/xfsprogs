@@ -393,7 +393,8 @@ fs_table_initialise_mounts(
 			continue;
 		if (!realpath(mnt->mnt_dir, rmnt_dir))
 			continue;
-		if (!realpath(mnt->mnt_fsname, rmnt_fsname))
+		if (strcmp(mnt->mnt_type, "tmpfs") &&
+		    !realpath(mnt->mnt_fsname, rmnt_fsname))
 			continue;
 
 		if (path &&
